@@ -1,0 +1,548 @@
+From c8de8584a64e699df6a72227bc2883d52129e028 Mon Sep 17 00:00:00 2001
+From: Assignment preparation assistant <assistant@localhost>
+Date: Mon, 9 Nov 2026 18:22:42 +0530
+Subject: [PATCH 3/3] Fix Flake8 line lengths and record verified outputs and
+ documentation
+
+---
+ START_HERE.md                           |  70 +++++++++++++++++
+ bike_share_stations.py                  |   5 +-
+ issues.md                               |  37 +++++++++
+ reflection.md                           |  11 +++
+ reports/after/bandit_report.txt         |  27 +++++++
+ reports/after/flake8_report.txt         |   0
+ reports/after/program_output.txt        |   2 +
+ reports/after/pylint_report.txt         |   4 +
+ reports/after/tests.txt                 |  18 +++++
+ reports/verification.json               |  22 ++++++
+ requirements-lock.txt                   |  20 +++++
+ sources/README_original.md              |  51 ++++++++++++
+ sources/bike_share_stations_original.py |  53 +++++++++++++
+ test_bike_share_stations.py             | 100 ++++++++++++++++++++++++
+ 14 files changed, 418 insertions(+), 2 deletions(-)
+ create mode 100644 START_HERE.md
+ create mode 100644 issues.md
+ create mode 100644 reflection.md
+ create mode 100644 reports/after/bandit_report.txt
+ create mode 100644 reports/after/flake8_report.txt
+ create mode 100644 reports/after/program_output.txt
+ create mode 100644 reports/after/pylint_report.txt
+ create mode 100644 reports/after/tests.txt
+ create mode 100644 reports/verification.json
+ create mode 100644 requirements-lock.txt
+ create mode 100644 sources/README_original.md
+ create mode 100644 sources/bike_share_stations_original.py
+ create mode 100644 test_bike_share_stations.py
+
+diff --git a/START_HERE.md b/START_HERE.md
+new file mode 100644
+index 0000000..5c184e0
+--- /dev/null
++++ b/START_HERE.md
+@@ -0,0 +1,70 @@
++# SE Lab 5: prepared work package
++
++Assigned student: Dhruv Rajagopalan, PES1UG24AM086, Section B, serial 23.
++Assigned repository: https://github.com/SETAPESU26/L5_23_bike_share_stations
++Starter revision: bcbe73582037325d899b64582217bb31f746fdde.
++Prepared on 9 November 2026 using Python 3.10.12 on Linux.
++
++## Read this before submission
++
++The code, issue table and actual before/after tool reports are prepared. Final checks: Pylint 10.00/10, Bandit zero findings, Flake8 zero findings, and 13 regression tests passed.
++
++**The reflection requirement is still unresolved.** The handout and repository refer to four reflection questions but do not include them. `reflection.md` is a factual draft, not verified answers to those missing questions. Get the actual prompts and match the draft to them. Do not treat this as a fully complete submission until that is done.
++
++This package was prepared with AI assistance at the student's request. Tool reports and local Git commits are genuine preparation records. They are not evidence that the student personally performed these steps. Review the code and follow any course rules on assistance/disclosure. The supplied handout and README do not state an AI-assistance policy, which is not proof that no course policy exists.
++
++No files were submitted to Classroom. No remote GitHub repository was changed or pushed to. The local history has exactly three new commits, grouped by Bandit, Pylint and Flake8 fixes, attributed to `Assignment preparation assistant`, not to Dhruv. `history/commits.txt`, `history/patches/` and `history/lab5.bundle` preserve that history. Any required remote commit/submission step remains for the student to perform in the correct course workflow.
++
++## Main files
++
++- `bike_share_stations.py`: cleaned program.
++- `issues.md`: 14 documented issues, including all tool findings and extra inspected bugs.
++- `reflection.md`: factual draft, with the missing-question caveat.
++- `reports/before/`: actual starter Pylint, Bandit, Flake8 and demonstration output.
++- `reports/after/`: actual cleaned-program reports, demonstration output and test results.
++- `reports/verification.json`: final commands and exit statuses.
++- `reports/bandit_stage_report.txt` and `reports/pylint_stage_report.txt`: intermediate verification.
++- `test_bike_share_stations.py`: 13 runtime regression tests.
++- `sources/`: unchanged starter and README.
++- `requirements-lock.txt`: installed Python package versions for reproduction.
++
++The final Flake8 report is an empty file because a clean run produces no text. Program-output PINs vary between runs because they use secure randomness. The final demonstration prints two lines: `True True`, then a four-digit PIN, `['Central Park']`, and `True`.
++
++## Run locally
++
++From this extracted folder on a laptop with Python 3:
++
++```sh
++python3 -m venv venv
++# Linux/macOS:
++source venv/bin/activate
++# Windows PowerShell instead:
++# .\venv\Scripts\Activate.ps1
++python -m pip install -r requirements-lock.txt
++python bike_share_stations.py
++python -m unittest -v test_bike_share_stations
++python -m pylint bike_share_stations.py
++python -m bandit -r bike_share_stations.py
++python -m flake8 bike_share_stations.py
++```
++
++The tool commands deliberately target the assignment file, not the unchanged starter copy in `sources/`. Default rules are used; no checks were disabled. The Python script itself needs only the standard library.
++
++## API changes
++
++Functions now use snake_case: `add_station`, `rent_bike`, `unlock_pin`, `full_stations`, `reset_station`, `has_bikes`. Their demonstration call sites have been updated. A failed rental now returns `False` instead of implicit `None`; the demo checks for that. Station validation rejects empty names, non-integer/Boolean counts, negative counts and bikes above capacity. SQLite errors are no longer silently swallowed. The database is still in-memory: data does not survive program exit.
++
++A clean static scan is not a production-security guarantee. Four-digit PINs would need attempt limits and expiry in a real system. The README warns that the starter may create an output file, but this particular assigned starter did not create one in the observed run.
++
++## Inspect the local Git history
++
++If Git is installed, clone the self-contained bundle into a new folder:
++
++```sh
++git clone history/lab5.bundle lab5-history
++cd lab5-history
++git log -3 --oneline
++git show HEAD
++```
++
++This restores the genuine local commits for inspection. It does not submit or publish anything. It does not reproduce the student's own work history. This extracted package includes the bundle and patch exports as delivery extras; those generated history exports are not themselves tracked inside the bundle.
+diff --git a/bike_share_stations.py b/bike_share_stations.py
+index 55981bb..f9ea798 100644
+--- a/bike_share_stations.py
++++ b/bike_share_stations.py
+@@ -1,11 +1,12 @@
+-"""Manage an in-memory bike-share network and demonstrate station operations."""
++"""Manage an in-memory bike-share network and demonstrate its operations."""
+ 
+ import secrets
+ import sqlite3
+ 
+ CONNECTION = sqlite3.connect(":memory:")
+ CONNECTION.execute(
+-    "CREATE TABLE stations (id INTEGER PRIMARY KEY, name TEXT, capacity INTEGER, bikes INTEGER)"
++    "CREATE TABLE stations (id INTEGER PRIMARY KEY, name TEXT, "
++    "capacity INTEGER, bikes INTEGER)"
+ )
+ 
+ 
+diff --git a/issues.md b/issues.md
+new file mode 100644
+index 0000000..c6e6610
+--- /dev/null
++++ b/issues.md
+@@ -0,0 +1,37 @@
++# Lab 5: identified issues and fixes
++
++Program: `bike_share_stations.py` in `SETAPESU26/L5_23_bike_share_stations`.
++Line numbers in the Line(s) column refer to the unchanged starter, not the cleaned file. Medium security severity is listed first; Bandit reported no high-severity findings.
++
++| Issue | Type | Line(s) | Description | Fix Approach |
++|-------|------|---------|-------------|--------------|
++| B608: SQL built from user data | Security, medium | 9 | Concatenating the station name and counts into SQL makes the statement unsafe and breaks names containing apostrophes. | Bind all three values with SQLite `?` placeholders in `add_station`. |
++| B311: insecure PIN randomness | Security, low | 1, 22 | `random.randint` is unsuitable for an unlock credential. | Use `1000 + secrets.randbelow(9000)` to retain the four-digit range. |
++| B110 / W0718: ignored broad exception | Security/reliability, low | 32-35 | Catching every exception and doing nothing hides database failures. | Remove the unnecessary catch so failures reach the caller. |
++| W0102: mutable default argument | Bug | 8 | A default list is shared between calls, mixing unrelated station logs. | Default to `None`, then create a new list inside each call. A supplied list is still supported. |
++| R1710: inconsistent return paths | API/logic | 14-18 | A successful rental returns `True`; failure implicitly returns `None`. | Use a conditional SQL update and return whether exactly one station was updated. Failure is explicitly `False`. |
++| Unchecked missing row | Runtime bug, found by inspection | 39-42 | `fetchone()` returns `None` for an unknown station, so `row[0]` raises an exception. | Short-circuit checks for a missing row and a NULL count before comparing the count. |
++| W0612 / F841: unused variable | Maintainability | 27 | `summary` is calculated and never used. | Remove it; return the station-name list directly. |
++| C0121 / E711: equality with None | Style/correctness | 40 | `== None` is not the intended identity check. | Use `is not None` in the guarded predicate. |
++| C0103: non-standard function names | Naming | 8, 14, 21, 25, 31, 38 | Camel-case function names do not follow Python's snake_case convention. | Rename functions and update every call in the demonstration. |
++| C0114 / C0116: missing documentation | Maintainability | 1, 8-45 | The module and functions do not describe their purpose or return behavior. | Add a module docstring and focused function docstrings. |
++| C0301 / E501: long lines | Formatting | 5, 9, 15, 17, 26, 33, 39 | Several statements exceed the tools' default line-length limits. | Split SQL strings and argument lists across lines, keeping the final program within 79 characters. |
++| C0303 / W291: trailing whitespace | Formatting | 27 | Trailing spaces make the file inconsistent. | Remove trailing spaces. |
++| Unconditional demonstration | Import side effect, found by inspection | 53 | Importing the module executes the demonstration and mutates station data. | Guard the demonstration with `if __name__ == "__main__"` and close its connection afterward. |
++| Missing input bounds | Data integrity, found by inspection | 8-11 | Negative counts or more bikes than capacity can create impossible station states. | Validate the name and integer counts, rejecting booleans and requiring `0 <= bikes <= capacity`. |
++
++## Verification
++
++Actual tool runs against the assigned program, using default rules with no disabled checks:
++
++| Check | Before | After |
++|-------|--------|-------|
++| Pylint 4.1.3 | 3.89/10; 22 messages | 10.00/10; no messages |
++| Bandit 1.9.4 | 3 findings: 1 medium, 2 low | 0 findings; 0 skipped checks/lines |
++| Flake8 7.4.1 | 10 findings | 0 findings |
++
++Raw reports are in `reports/before/` and `reports/after/`. The final Flake8 report is intentionally empty: Flake8 prints nothing on a clean run. Exit statuses are recorded in `reports/verification.json`.
++
++Additional regression tests cover quoted names/SQL-looking input, independent default logs, explicit log reuse, rental exhaustion, unknown stations, full stations, reset behavior, NULL bike counts, input validation, PIN boundaries/range and propagation of database failures. These are runtime checks in addition to static analysis; neither passing tests nor a clean scan proves the program is secure in every setting.
++
++The cleaned program is still a small in-memory demonstration, not a production unlock service. Four-digit PINs have a small search space; real systems also need attempt limits, expiry, authenticated access and secure storage.
+diff --git a/reflection.md b/reflection.md
+new file mode 100644
+index 0000000..5e7e85c
+--- /dev/null
++++ b/reflection.md
+@@ -0,0 +1,11 @@
++# Reflection draft: factual points from this analysis
++
++**Status: draft, not verified answers to the required questions.** Both the supplied handout and repository README refer to four reflection questions, but neither actually lists them. This text records the analysis without inventing those questions or claiming that Dhruv personally ran the tools. Match it to the actual questions before treating the reflection requirement as complete.
++
++The most important finding in this program is the SQL constructed by joining strings. It is both a security concern and a functional bug for station names containing an apostrophe. Parameterized SQL separates the statement from its data, addressing both problems without filtering out valid station names.
++
++The three tools cover different kinds of problems. Bandit identified unsafe SQL construction, non-cryptographic randomness for an unlock PIN, and a silently ignored exception. Pylint identified maintainability and logic problems such as the shared default list and inconsistent returns. Flake8 identified formatting problems and the unused variable. Their findings overlap in places, but one tool does not replace the others.
++
++The revised program uses an independent default log, consistent Boolean rental results, secure randomness, and explicit checks for missing stations. The function names and docstrings make the code easier to follow. The supplied before/after reports show Pylint improving from 3.89/10 to 10.00/10, with all three Bandit findings and all ten Flake8 findings removed under the installed tools' default rules.
++
++Static analysis has limits. The missing-row crash in `hasBikes` needed code inspection and a runtime test rather than a reported finding from these runs. The regression tests check expected behavior and edge cases, but a perfect Pylint score and clean Bandit report are not proof of complete correctness or production security. For example, the demonstration's four-digit PIN would still need attempt limits and expiry in a real unlock service.
+diff --git a/reports/after/bandit_report.txt b/reports/after/bandit_report.txt
+new file mode 100644
+index 0000000..0b039f0
+--- /dev/null
++++ b/reports/after/bandit_report.txt
+@@ -0,0 +1,27 @@
++Run started:2026-11-09 12:52:17.351688+00:00
++
++Test results:
++	No issues identified.
++
++Code scanned:
++	Total lines of code: 66
++	Total lines skipped (#nosec): 0
++	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 0
++
++Run metrics:
++	Total issues (by severity):
++		Undefined: 0
++		Low: 0
++		Medium: 0
++		High: 0
++	Total issues (by confidence):
++		Undefined: 0
++		Low: 0
++		Medium: 0
++		High: 0
++Files skipped (0):
++[main]	INFO	profile include tests: None
++[main]	INFO	profile exclude tests: None
++[main]	INFO	cli include tests: None
++[main]	INFO	cli exclude tests: None
++[main]	INFO	running on Python 3.10.12
+diff --git a/reports/after/flake8_report.txt b/reports/after/flake8_report.txt
+new file mode 100644
+index 0000000..e69de29
+diff --git a/reports/after/program_output.txt b/reports/after/program_output.txt
+new file mode 100644
+index 0000000..b51ad26
+--- /dev/null
++++ b/reports/after/program_output.txt
+@@ -0,0 +1,2 @@
++True True
++6177 ['Central Park'] True
+diff --git a/reports/after/pylint_report.txt b/reports/after/pylint_report.txt
+new file mode 100644
+index 0000000..d7495ee
+--- /dev/null
++++ b/reports/after/pylint_report.txt
+@@ -0,0 +1,4 @@
++
++--------------------------------------------------------------------
++Your code has been rated at 10.00/10 (previous run: 10.00/10, +0.00)
++
+diff --git a/reports/after/tests.txt b/reports/after/tests.txt
+new file mode 100644
+index 0000000..d5cefce
+--- /dev/null
++++ b/reports/after/tests.txt
+@@ -0,0 +1,18 @@
++test_database_errors_are_not_swallowed (test_bike_share_stations.StationTests) ... ok
++test_default_logs_are_independent (test_bike_share_stations.StationTests) ... ok
++test_empty_names_are_rejected (test_bike_share_stations.StationTests) ... ok
++test_explicit_log_is_preserved (test_bike_share_stations.StationTests) ... ok
++test_full_stations (test_bike_share_stations.StationTests) ... ok
++test_generated_pins_are_four_digits (test_bike_share_stations.StationTests) ... ok
++test_invalid_counts_are_rejected (test_bike_share_stations.StationTests) ... ok
++test_null_bike_count_is_safe (test_bike_share_stations.StationTests) ... ok
++test_pin_boundaries (test_bike_share_stations.StationTests) ... ok
++test_quoted_name_is_data (test_bike_share_stations.StationTests) ... ok
++test_rent_decrements_and_stops_at_zero (test_bike_share_stations.StationTests) ... ok
++test_reset_empties_station (test_bike_share_stations.StationTests) ... ok
++test_unknown_station_is_safe (test_bike_share_stations.StationTests) ... ok
++
++----------------------------------------------------------------------
++Ran 13 tests in 0.002s
++
++OK
+diff --git a/reports/verification.json b/reports/verification.json
+new file mode 100644
+index 0000000..9096be3
+--- /dev/null
++++ b/reports/verification.json
+@@ -0,0 +1,22 @@
++{
++  "pylint": {
++    "command": "pylint bike_share_stations.py",
++    "exit_code": 0
++  },
++  "bandit": {
++    "command": "bandit -r bike_share_stations.py",
++    "exit_code": 0
++  },
++  "flake8": {
++    "command": "flake8 bike_share_stations.py",
++    "exit_code": 0
++  },
++  "unit_tests": {
++    "command": "python -m unittest -v test_bike_share_stations",
++    "exit_code": 0
++  },
++  "program": {
++    "command": "python bike_share_stations.py",
++    "exit_code": 0
++  }
++}
+diff --git a/requirements-lock.txt b/requirements-lock.txt
+new file mode 100644
+index 0000000..5f89a55
+--- /dev/null
++++ b/requirements-lock.txt
+@@ -0,0 +1,20 @@
++astroid==4.3.4
++bandit==1.9.4
++dill==0.4.1
++flake8==7.4.1
++isort==9.0.2
++markdown-it-py==4.2.0
++mccabe==0.7.0
++mdurl==0.1.2
++mypy_extensions==1.2.0
++platformdirs==4.12.4
++pycodestyle==2.15.0
++pyflakes==4.0.3
++Pygments==2.21.0
++pylint==4.1.3
++PyYAML==6.0.3
++rich==15.0.0
++stevedore==5.8.0
++tomli==2.5.0
++tomlkit==0.15.2
++typing_extensions==4.16.0
+diff --git a/sources/README_original.md b/sources/README_original.md
+new file mode 100644
+index 0000000..254a3c6
+--- /dev/null
++++ b/sources/README_original.md
+@@ -0,0 +1,51 @@
++# Lab 5: Static Code Analysis — Bike-Share Station Manager
++
++**Your file:** `bike_share_stations.py`
++
++Follow the lab handout for the full instructions.
++
++## About the program
++
++A manager for a bike-share network. It registers stations, rents out bikes, issues unlock PINs, finds full stations and resets a station.
++
++The code works, but only just. It has quality, style and security problems of the kind Pylint, Flake8 and Bandit are built to find.
++
++## What to do
++
++1. **Run it first** and read the output carefully:
++   ```bash
++   python bike_share_stations.py
++   ```
++   It runs a short demonstration and may create a small output file in the current folder, so run it from a folder you don't mind adding files to.
++
++2. **Install the tools:**
++   ```bash
++   pip install pylint bandit flake8
++   ```
++
++3. **Run the analysis** and save the reports:
++   ```bash
++   pylint bike_share_stations.py > pylint_report.txt
++   bandit -r bike_share_stations.py > bandit_report.txt
++   flake8 bike_share_stations.py > flake8_report.txt
++   ```
++
++4. **Document the issues** in `issues.md` using this table (at least 4 rows, high and medium severity first):
++
++   | Issue | Type | Line(s) | Description | Fix Approach |
++   |-------|------|---------|-------------|--------------|
++   | ... | ... | ... | ... | ... |
++
++5. **Fix the code.** Fix at least 4 of the issues you documented, then rerun all three tools to confirm they are gone. Repeat until you are satisfied. The program should still do its job when you are done.
++
++6. **Reflect.** Answer the four reflection questions from the handout in `reflection.md`.
++
++## Deliverables
++
++1. `bike_share_stations.py`: your cleaned version, with at least 4 issues fixed.
++2. `issues.md`: the completed issue table.
++3. `reflection.md`: your answers to the reflection questions.
++
++**Target:** aim for a Pylint score above 9.5 on your final file. A perfect 10.00/10 is very good.
++
++Be ready to explain the bugs you found and how you fixed them. You may be called on to present.
+diff --git a/sources/bike_share_stations_original.py b/sources/bike_share_stations_original.py
+new file mode 100644
+index 0000000..c55e3ab
+--- /dev/null
++++ b/sources/bike_share_stations_original.py
+@@ -0,0 +1,53 @@
++import random
++import sqlite3
++
++conn = sqlite3.connect(":memory:")
++conn.execute("CREATE TABLE stations (id INTEGER PRIMARY KEY, name TEXT, capacity INTEGER, bikes INTEGER)")
++
++
++def addStation(name, capacity, bikes, log=[]):
++    conn.execute("INSERT INTO stations (name, capacity, bikes) VALUES ('" + name + "', " + str(capacity) + ", " + str(bikes) + ")")
++    log.append(name)
++    return log
++
++
++def rentBike(station_id):
++    row = conn.execute("SELECT bikes FROM stations WHERE id = ?", (station_id,)).fetchone()
++    if row and row[0] > 0:
++        conn.execute("UPDATE stations SET bikes = bikes - 1 WHERE id = ?", (station_id,))
++        return True
++
++
++def unlockPin():
++    return random.randint(1000, 9999)
++
++
++def fullStations():
++    stations = conn.execute("SELECT name FROM stations WHERE bikes = capacity").fetchall()
++    summary = len(stations)   
++    return [s[0] for s in stations]
++
++
++def resetStation(station_id):
++    try:
++        conn.execute("UPDATE stations SET bikes = 0 WHERE id = ?", (station_id,))
++    except Exception:
++        pass
++
++
++def hasBikes(station_id):
++    row = conn.execute("SELECT bikes FROM stations WHERE id = ?", (station_id,)).fetchone()
++    if row[0] == None:
++        return False
++    return row[0] > 0
++
++
++def main():
++    addStation("Central Park", 10, 10)
++    addStation("Metro Gate", 8, 2)
++    print(rentBike(2), rentBike(9) is None)
++    print(unlockPin(), fullStations(), hasBikes(2))
++    resetStation(1)
++
++
++main()
+diff --git a/test_bike_share_stations.py b/test_bike_share_stations.py
+new file mode 100644
+index 0000000..8fcd792
+--- /dev/null
++++ b/test_bike_share_stations.py
+@@ -0,0 +1,100 @@
++"""Behavior checks for the cleaned bike-share assignment."""
++
++import sqlite3
++import unittest
++from unittest import mock
++
++import bike_share_stations as app
++
++
++class StationTests(unittest.TestCase):
++    """Use an isolated station table for every test."""
++
++    def setUp(self):
++        app.CONNECTION.execute("DELETE FROM stations")
++
++    def test_quoted_name_is_data(self):
++        name = "O'Brien'); DROP TABLE stations; --"
++        app.add_station(name, 5, 5)
++        self.assertEqual(app.full_stations(), [name])
++        app.add_station("Still works", 2, 1)
++
++    def test_default_logs_are_independent(self):
++        first = app.add_station("One", 2, 1)
++        second = app.add_station("Two", 2, 1)
++        self.assertEqual(first, ["One"])
++        self.assertEqual(second, ["Two"])
++        self.assertIsNot(first, second)
++
++    def test_explicit_log_is_preserved(self):
++        log = ["Previous"]
++        self.assertIs(app.add_station("New", 2, 1, log), log)
++        self.assertEqual(log, ["Previous", "New"])
++
++    def test_rent_decrements_and_stops_at_zero(self):
++        app.add_station("One", 2, 1)
++        station_id = app.CONNECTION.execute(
++            "SELECT id FROM stations"
++        ).fetchone()[0]
++        self.assertTrue(app.rent_bike(station_id))
++        self.assertFalse(app.rent_bike(station_id))
++        self.assertFalse(app.has_bikes(station_id))
++
++    def test_unknown_station_is_safe(self):
++        self.assertFalse(app.rent_bike(-1))
++        self.assertFalse(app.has_bikes(-1))
++        app.reset_station(-1)
++
++    def test_full_stations(self):
++        app.add_station("Full", 3, 3)
++        app.add_station("Partial", 3, 2)
++        self.assertEqual(app.full_stations(), ["Full"])
++
++    def test_reset_empties_station(self):
++        app.add_station("One", 2, 2)
++        station_id = app.CONNECTION.execute(
++            "SELECT id FROM stations"
++        ).fetchone()[0]
++        app.reset_station(station_id)
++        self.assertFalse(app.has_bikes(station_id))
++        self.assertEqual(app.full_stations(), [])
++
++    def test_null_bike_count_is_safe(self):
++        cursor = app.CONNECTION.execute(
++            "INSERT INTO stations (name, capacity, bikes) VALUES (?, ?, ?)",
++            ("Missing count", 3, None),
++        )
++        self.assertFalse(app.has_bikes(cursor.lastrowid))
++
++    def test_invalid_counts_are_rejected(self):
++        for capacity, bikes in [(2, 3), (-1, 0), (2, -1), (2, 1.5),
++                                (True, 1), (2, False)]:
++            with self.subTest(capacity=capacity, bikes=bikes):
++                with self.assertRaises(ValueError):
++                    app.add_station("Invalid", capacity, bikes)
++
++    def test_empty_names_are_rejected(self):
++        for name in ["", "  ", None]:
++            with self.subTest(name=name):
++                with self.assertRaises(ValueError):
++                    app.add_station(name, 2, 1)
++
++    def test_pin_boundaries(self):
++        with mock.patch.object(app.secrets, "randbelow", return_value=0):
++            self.assertEqual(app.unlock_pin(), 1000)
++        with mock.patch.object(app.secrets, "randbelow", return_value=8999):
++            self.assertEqual(app.unlock_pin(), 9999)
++
++    def test_generated_pins_are_four_digits(self):
++        for _ in range(100):
++            self.assertIn(app.unlock_pin(), range(1000, 10000))
++
++    def test_database_errors_are_not_swallowed(self):
++        with mock.patch.object(app, "CONNECTION") as database:
++            database.execute.side_effect = sqlite3.OperationalError("test")
++            with self.assertRaises(sqlite3.OperationalError):
++                app.reset_station(1)
++
++
++if __name__ == "__main__":
++    unittest.main(verbosity=2)
+-- 
+2.34.1
+

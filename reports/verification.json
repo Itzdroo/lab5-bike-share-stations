@@ -1,0 +1,22 @@
+{
+  "pylint": {
+    "command": "pylint bike_share_stations.py",
+    "exit_code": 0
+  },
+  "bandit": {
+    "command": "bandit -r bike_share_stations.py",
+    "exit_code": 0
+  },
+  "flake8": {
+    "command": "flake8 bike_share_stations.py",
+    "exit_code": 0
+  },
+  "unit_tests": {
+    "command": "python -m unittest -v test_bike_share_stations",
+    "exit_code": 0
+  },
+  "program": {
+    "command": "python bike_share_stations.py",
+    "exit_code": 0
+  }
+}
